@@ -176,13 +176,19 @@ Save data is schema-validated on load — slots with missing or malformed requir
 
 The following hardening was applied in the last audit pass:
 
-- **Content Security Policy** — `<meta>` CSP tag in `index.html` restricts scripts and styles to `'self'`, blocking inline injection attacks
+- **Content Security Policy** — `<meta>` CSP tag in `index.html` uses `script-src 'self' 'unsafe-inline'`; `'unsafe-inline'` is required because all button wiring uses inline `onclick` attributes. Removing it silently breaks all interactivity.
 - **Save schema validation** — `save.js` validates deserialized `localStorage` data before merging into game state; prototype-poisoning keys (`__proto__`, `constructor`, `prototype`) are blocked
 - **Prototype pollution guard** — `state.js` `load()` only writes keys that already exist on the `State` object; `hud.js` `adjustSpokes()` uses `hasOwnProperty` before writing spoke values
 - **XSS sanitization** — all save-derived or user-influenced strings (save slot names, map location names, intel entries, journal entries, ending titles) are HTML-escaped before `innerHTML` insertion in `overlays.js`, `hud.js`, and `ui.js`
 - **Debate injection fix** — the continue-round button in `debate.js` uses a DOM event listener instead of an inline `onclick` string that previously embedded `State.debate.id` directly
 - **Combat log** — `combat.js` `_log()` uses `textContent` instead of `innerHTML`
 - **Debate timer pause** — `debate.js` pauses the round timer on `visibilitychange` (tab blur) to prevent unfair timeouts
+
+### Known bugs fixed
+
+- **All buttons unresponsive** — `script-src 'self'` (without `'unsafe-inline'`) in the CSP blocked every inline `onclick` handler silently. Fixed by adding `'unsafe-inline'` to `script-src` in `index.html`.
+- **Crash on player death in combat** — `combat.js` accessed `#go-score` directly before the game-over overlay HTML existed. Fixed by calling `Overlays.buildGameOver()` before opening the overlay.
+- **Blank sidebar on save-load from title screen** — `Save.load()` called HUD update methods before the sidebar pane shells were in the DOM (they are normally built by `Game.selectClass()`). Fixed by rebuilding missing pane shells inside `Save.load()`.
 
 ---
 
