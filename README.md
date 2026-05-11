@@ -2,7 +2,7 @@
 
 A narrative RPG set in 3rd century BCE India. Serve Emperor Ashoka across three acts of conquest, remorse, and enlightenment. Every choice shifts the Dharma Wheel. History bends around your decisions.
 
-**[Play it live →](https://your-username.github.io/dharmavijaya)** *(update this link after deploying)*
+**[Play it live →] http://onkarbhattacharya.github.io/dharmavijaya **
 
 ---
 
@@ -167,6 +167,22 @@ Then use `art: 'my_location'` in any scene.
 ## Save System
 
 The game auto-saves to `localStorage` in 3 named slots. Saves survive browser refreshes but not private/incognito windows.
+
+Save data is schema-validated on load — slots with missing or malformed required fields (`dharmaScore`, `scene`, `act`) are rejected silently.
+
+---
+
+## Security
+
+The following hardening was applied in the last audit pass:
+
+- **Content Security Policy** — `<meta>` CSP tag in `index.html` restricts scripts and styles to `'self'`, blocking inline injection attacks
+- **Save schema validation** — `save.js` validates deserialized `localStorage` data before merging into game state; prototype-poisoning keys (`__proto__`, `constructor`, `prototype`) are blocked
+- **Prototype pollution guard** — `state.js` `load()` only writes keys that already exist on the `State` object; `hud.js` `adjustSpokes()` uses `hasOwnProperty` before writing spoke values
+- **XSS sanitization** — all save-derived or user-influenced strings (save slot names, map location names, intel entries, journal entries, ending titles) are HTML-escaped before `innerHTML` insertion in `overlays.js`, `hud.js`, and `ui.js`
+- **Debate injection fix** — the continue-round button in `debate.js` uses a DOM event listener instead of an inline `onclick` string that previously embedded `State.debate.id` directly
+- **Combat log** — `combat.js` `_log()` uses `textContent` instead of `innerHTML`
+- **Debate timer pause** — `debate.js` pauses the round timer on `visibilitychange` (tab blur) to prevent unfair timeouts
 
 ---
 
