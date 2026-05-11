@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════════════
+   js/data/classes.js
+   Add a new class by adding an entry here.
+   All fields are required.
+═══════════════════════════════════════════════ */
+const CLASSES_DATA = {
+  kshatriya: {
+    id:         'kshatriya',
+    name:       'Kshatriya',
+    icon:       '⚔️',
+    css:        'warrior',
+    tagline:    'Warrior of the Empire',
+    desc:       'Commands troops, leads sieges, walks the blade between duty and destruction. High physical damage and a battle-rage mechanic — but dharma comes hard.',
+    hp:         150,
+    mp:         60,
+    dharma:     10,
+    gold:       220,
+    attack:     22,
+    defense:    15,
+    mantraStr:  0.6,
+    items:      ['iron_sword', 'chain_armor', 'war_drum'],
+    badges:     [['sb-red','Combat ★★★'], ['sb-teal','Dharma ★'], ['sb-gold','Intel ★★']],
+  },
+
+  bhikshu: {
+    id:         'bhikshu',
+    name:       'Bhikshu',
+    icon:       '☸️',
+    css:        'monk',
+    tagline:    'Buddhist Monk',
+    desc:       'Travels with the army as chaplain. The lowest material power — the highest dharma. Can see through Mara\'s disguises and reach Ashoka where no general can.',
+    hp:         80,
+    mp:         140,
+    dharma:     55,
+    gold:       80,
+    attack:     10,
+    defense:    8,
+    mantraStr:  2.0,
+    items:      ['prayer_beads', 'dharma_scroll', 'healing_herb'],
+    badges:     [['sb-teal','Dharma ★★★'], ['sb-blue','Mantra ★★★'], ['sb-red','Combat ★']],
+  },
+
+  amatya: {
+    id:         'amatya',
+    name:       'Amatya',
+    icon:       '🪬',
+    css:        'spy',
+    tagline:    'Court Spy & Minister',
+    desc:       'Balances loyalty to Ashoka with survival in a court full of factions. Masters disguise, poison, and information control. The class with the most branching narrative.',
+    hp:         105,
+    mp:         95,
+    dharma:     28,
+    gold:       260,
+    attack:     15,
+    defense:    12,
+    mantraStr:  1.0,
+    items:      ['poison_vial', 'cipher_tablet', 'disguise_kit'],
+    badges:     [['sb-gold','Intel ★★★'], ['sb-teal','Dharma ★★'], ['sb-red','Combat ★★']],
+  },
+
+  sthapati: {
+    id:         'sthapati',
+    name:       'Sthapati',
+    icon:       '🏛️',
+    css:        'builder',
+    tagline:    'Master Builder',
+    desc:       'Shapes cities and stupas. Understands sacred geometry. Can ward buildings with mystical geometry and reshape cities to shift loyalty. War is just another construction problem.',
+    hp:         115,
+    mp:         85,
+    dharma:     38,
+    gold:       190,
+    attack:     12,
+    defense:    18,
+    mantraStr:  1.3,
+    items:      ['sacred_compass', 'stone_tablet', 'rope_ladder'],
+    badges:     [['sb-blue','Build ★★★'], ['sb-teal','Dharma ★★'], ['sb-red','Combat ★']],
+  },
+};

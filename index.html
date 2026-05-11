@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dharmavijaya — Victory Through Righteousness</title>
+  <meta name="description" content="A narrative RPG set in 3rd century BCE India. Serve Emperor Ashoka across three acts of conquest, remorse, and enlightenment." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets (load order matters) -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/screens.css" />
+  <link rel="stylesheet" href="css/hud.css" />
+  <link rel="stylesheet" href="css/overlays.css" />
+  <link rel="stylesheet" href="css/sidebar.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<div id="grain"></div>
+<div id="app">
+
+  <!-- ══════════════════════════════
+       TITLE SCREEN
+  ══════════════════════════════ -->
+  <div id="screen-title" class="screen active">
+    <svg class="title-dharma-wheel" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="90" cy="90" r="82" stroke="#C9A84C" stroke-width="1.5" opacity=".4"/>
+      <circle cx="90" cy="90" r="58" stroke="#C9A84C" stroke-width=".8" opacity=".25"/>
+      <circle cx="90" cy="90" r="30" stroke="#C9A84C" stroke-width=".5" opacity=".2"/>
+      <circle cx="90" cy="90" r="9"  fill="#C9A84C" opacity=".8"/>
+      <g stroke="#C9A84C" stroke-width="1.4" opacity=".65">
+        <line x1="90" y1="8"   x2="90"  y2="32"/><line x1="90"  y1="148" x2="90"  y2="172"/>
+        <line x1="8"  y1="90"  x2="32"  y2="90"/><line x1="148" y1="90"  x2="172" y2="90"/>
+        <line x1="26.4" y1="26.4" x2="43.6" y2="43.6"/><line x1="136.4" y1="136.4" x2="153.6" y2="153.6"/>
+        <line x1="153.6" y1="26.4" x2="136.4" y2="43.6"/><line x1="43.6" y1="136.4" x2="26.4" y2="153.6"/>
+        <line x1="57" y1="12" x2="63" y2="35"/><line x1="117" y1="145" x2="123" y2="168"/>
+        <line x1="12" y1="57" x2="35" y2="63"/><line x1="145" y1="117" x2="168" y2="123"/>
+        <line x1="123" y1="12" x2="117" y2="35"/><line x1="57" y1="145" x2="63" y2="168"/>
+        <line x1="168" y1="57" x2="145" y2="63"/><line x1="12" y1="123" x2="35" y2="117"/>
+      </g>
+      <circle cx="90"  cy="8"    r="4.5" fill="#C9A84C" opacity=".85"/>
+      <circle cx="90"  cy="172"  r="4.5" fill="#C9A84C" opacity=".85"/>
+      <circle cx="8"   cy="90"   r="4.5" fill="#C9A84C" opacity=".85"/>
+      <circle cx="172" cy="90"   r="4.5" fill="#C9A84C" opacity=".85"/>
+      <circle cx="26.4"  cy="26.4"  r="3.5" fill="#C9A84C" opacity=".7"/>
+      <circle cx="153.6" cy="26.4"  r="3.5" fill="#C9A84C" opacity=".7"/>
+      <circle cx="26.4"  cy="153.6" r="3.5" fill="#C9A84C" opacity=".7"/>
+      <circle cx="153.6" cy="153.6" r="3.5" fill="#C9A84C" opacity=".7"/>
+    </svg>
+    <div class="title-main">DHARMAVIJAYA</div>
+    <div class="title-sub">Victory through Righteousness</div>
+    <div class="title-year">261 BCE · MAURYAN EMPIRE · INDIA</div>
+    <div class="title-btns">
+      <button class="btn-main" onclick="Game.startGame()">⚔ BEGIN YOUR JOURNEY</button>
+      <button class="btn-main btn-secondary-main" onclick="Game.showSave('load')">☸ CONTINUE JOURNEY</button>
+      <button class="btn-text" onclick="UI.openCodex()">About this world</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       CLASS SELECT SCREEN
+  ══════════════════════════════ -->
+  <div id="screen-class" class="screen">
+    <div class="class-header">
+      <h1>Choose Your Path</h1>
+      <p>Your class shapes how you serve — and challenge — the Mauryan Empire</p>
+    </div>
+    <div class="class-grid" id="class-grid"></div>
+    <div class="class-footer">
+      <p>Each class unlocks unique dialogue options, abilities, and story paths.<br>All classes complete the game — but the journey differs greatly.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       MAIN GAME SCREEN
+  ══════════════════════════════ -->
+  <div id="screen-game" class="screen">
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-identity">
+        <div class="pname" id="hud-name">—</div>
+        <div class="pclass" id="hud-class">—</div>
+      </div>
+      <div class="hud-vitals">
+        <div class="vital">
+          <span class="vital-lbl txt-blood">HP</span>
+          <div class="vital-track"><div class="vital-fill vf-hp" id="bar-hp"></div></div>
+          <span class="vital-num" id="txt-hp">100/100</span>
+        </div>
+        <div class="vital">
+          <span class="vital-lbl txt-dharma">☸</span>
+          <div class="vital-track"><div class="vital-fill vf-dharma" id="bar-dharma"></div></div>
+        </div>
+        <div class="vital">
+          <span class="vital-lbl txt-sky">MP</span>
+          <div class="vital-track"><div class="vital-fill vf-mp" id="bar-mp"></div></div>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-score">☸ <span id="hud-dharma-score">0</span></div>
+        <div class="hud-gold">◈ <span id="hud-gold">0</span></div>
+        <div class="hud-act" id="hud-act">ACT I</div>
+      </div>
+    </div>
+
+    <!-- Game Body -->
+    <div class="game-body">
+      <!-- Scene column -->
+      <div class="scene-col">
+        <div class="scene-art" id="scene-art">
+          <div class="art-gradient"></div>
+          <div class="scene-loc-badge" id="scene-loc"></div>
+          <div class="scene-act-badge" id="scene-act-badge">ACT I</div>
+        </div>
+        <div class="story-area" id="story-area">
+          <div class="story-body" id="story-body"></div>
+        </div>
+        <div class="choices-area" id="choices-area"></div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-tabs">
+          <button class="stab active" onclick="UI.switchTab('wheel',this)">☸</button>
+          <button class="stab" onclick="UI.switchTab('stats',this)">⚔</button>
+          <button class="stab" onclick="UI.switchTab('inv',this)">🎒</button>
+          <button class="stab" onclick="UI.switchTab('lore',this)">📜</button>
+        </div>
+        <div id="pane-wheel"  class="sidebar-pane active"></div>
+        <div id="pane-stats"  class="sidebar-pane"></div>
+        <div id="pane-inv"    class="sidebar-pane"></div>
+        <div id="pane-lore"   class="sidebar-pane"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+      <button class="bb-btn" onclick="Game.toggleMap()">🗺 MAP</button>
+      <button class="bb-btn" onclick="Game.showSave('save')">💾 SAVE</button>
+      <button class="bb-btn" onclick="UI.openMerchant()">🛒 MARKET</button>
+      <button class="bb-btn" onclick="UI.openSpyNetwork()">🕵 SANSTHA</button>
+      <button class="bb-btn" onclick="UI.openQuestLog()">📋 QUESTS</button>
+      <button class="bb-btn" onclick="UI.openCodex()">📖 CODEX</button>
+      <button class="bb-btn" onclick="UI.openAchievements()">🏆</button>
+      <button class="bb-btn" onclick="UI.openTimeline()">📜 LOG</button>
+      <button class="bb-btn" id="btn-sound" onclick="Audio.toggle()">🔇 SOUND</button>
+      <div class="bb-spacer"></div>
+      <button class="bb-btn" onclick="Game.goTitle()">↩ MENU</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       OVERLAYS (injected by JS)
+  ══════════════════════════════ -->
+  <div id="overlay-combat"   class="overlay" data-overlay="combat"></div>
+  <div id="overlay-debate"   class="overlay" data-overlay="debate"></div>
+  <div id="overlay-map"      class="overlay" data-overlay="map"></div>
+  <div id="overlay-save"     class="overlay" data-overlay="save"></div>
+  <div id="overlay-gameover" class="overlay" data-overlay="gameover"></div>
+  <div id="overlay-ending"   class="overlay" data-overlay="ending" style="overflow-y:auto"></div>
+
+</div><!-- #app -->
+
+<!-- ══════════════════════════════
+     JAVASCRIPT MODULES
+     Load order: data → systems → scenes → main
+══════════════════════════════ -->
+
+<!-- Data layer -->
+<script src="js/data/classes.js"></script>
+<script src="js/data/items.js"></script>
+<script src="js/data/enemies.js"></script>
+<script src="js/data/lore.js"></script>
+<script src="js/data/art.js"></script>
+<script src="js/data/debates.js"></script>
+<script src="js/data/endings.js"></script>
+<script src="js/data/achievements.js"></script>
+<script src="js/data/map.js"></script>
+<script src="js/data/shop.js"></script>
+<script src="js/data/quests.js"></script>
+<script src="js/data/spy.js"></script>
+
+<!-- Scene data (split by act for easy editing) -->
+<script src="js/scenes/act1.js"></script>
+<script src="js/scenes/act2.js"></script>
+<script src="js/scenes/act3.js"></script>
+<script src="js/scenes/sidequests.js"></script>
+
+<!-- Systems -->
+<script src="js/systems/state.js"></script>
+<script src="js/systems/engine.js"></script>
+<script src="js/systems/combat.js"></script>
+<script src="js/systems/debate.js"></script>
+<script src="js/systems/audio.js"></script>
+<script src="js/systems/save.js"></script>
+
+<!-- UI layer -->
+<script src="js/systems/hud.js"></script>
+<script src="js/systems/ui.js"></script>
+<script src="js/systems/overlays.js"></script>
+
+<!-- Entry point -->
+<script src="js/main.js"></script>
+
+</body>
+</html>

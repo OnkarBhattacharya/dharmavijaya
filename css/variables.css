@@ -1,0 +1,52 @@
+/* ═══════════════════════════════════════════════
+   css/variables.css
+   Design tokens — edit here to retheme the game
+═══════════════════════════════════════════════ */
+:root {
+  /* Palette */
+  --gold:         #C9A84C;
+  --gold-light:   #E8C96A;
+  --gold-dim:     #9A7A32;
+  --gold-dark:    #6B5218;
+  --blood:        #8B1A1A;
+  --blood-mid:    #B83030;
+  --blood-light:  #E05050;
+  --dharma:       #2E7D6E;
+  --dharma-mid:   #3DA090;
+  --dharma-light: #4ECDC4;
+  --dharma-pale:  #1A4A44;
+  --ink:          #0D0A05;
+  --ink2:         #1A1208;
+  --ink3:         #2A1A10;
+  --parch:        #F0E4C4;
+  --parch-dim:    #C8B890;
+  --parch-dark:   #8A7858;
+  --stone:        #4A3728;
+  --ash:          #7A6248;
+  --ash-light:    #A08060;
+  --lotus:        #C84880;
+  --sky:          #245582;
+  --sky2:         #1A3A6A;
+  --mara:         #3A1A5A;
+  --mara-light:   #8A50C0;
+
+  /* Semantic */
+  --panel-bg:     rgba(13,10,5,0.92);
+  --border:       rgba(74,55,40,0.5);
+  --border-gold:  rgba(201,168,76,0.35);
+  --border-dharma:rgba(46,125,110,0.4);
+
+  /* Typography */
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-body:    'Crimson Pro', Georgia, serif;
+
+  /* Spacing */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* Z-index layers */
+  --z-hud:        10;
+  --z-overlay:    50;
+  --z-toast:      200;
+  --z-grain:      1000;
+}

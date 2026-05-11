@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════
+   css/base.css
+   Reset, body, scrollbars, utility classes
+═══════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--ink); }
+
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--parch);
+  line-height: 1.65;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--stone); border-radius: 2px; }
+
+/* Grain overlay */
+#grain {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: var(--z-grain);
+  opacity: .03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* App container */
+#app { position: fixed; inset: 0; overflow: hidden; }
+
+/* Screens */
+.screen { position: absolute; inset: 0; display: none; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* Utility */
+.hidden { display: none !important; }
+.fade-in { animation: fadeIn .35s ease both; }
+.fade-up { animation: fadeUp .4s ease both; }
+.shake   { animation: screenShake .3s ease; }
+
+/* Color utilities */
+.txt-gold   { color: var(--gold); }
+.txt-dharma { color: var(--dharma-light); }
+.txt-blood  { color: var(--blood-light); }
+.txt-mara   { color: var(--mara-light); }
+.txt-ash    { color: var(--ash); }
+.txt-sky    { color: #80B4E0; }
+
+/* Divider */
+.divider {
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+  margin: 12px 0;
+}
+
+/* Pane section title */
+.pane-section-title {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: var(--ash);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}

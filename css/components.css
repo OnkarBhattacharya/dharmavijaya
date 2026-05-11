@@ -1,0 +1,160 @@
+/* ═══════════════════════════════════════════════
+   css/components.css
+   Merchant, Spy Network, Quest Log, Codex,
+   Achievements, Timeline — all dynamic panels
+═══════════════════════════════════════════════ */
+
+/* ── SHARED PANEL SHELL ── */
+.panel-overlay {
+  position: absolute; inset: 0;
+  z-index: var(--z-overlay);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 16px; overflow-y: auto;
+}
+.panel-overlay.active { display: flex; }
+.panel-box {
+  max-width: 480px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 18px; color: var(--gold);
+  letter-spacing: .1em; text-align: center;
+  margin-bottom: 4px;
+}
+.panel-sub {
+  font-style: italic; color: var(--ash);
+  font-size: 12px; text-align: center;
+  margin-bottom: 16px;
+}
+.panel-section-label {
+  font-family: var(--font-display);
+  font-size: 10px; letter-spacing: .1em;
+  color: var(--ash); text-transform: uppercase;
+  margin-bottom: 8px; margin-top: 12px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── MERCHANT ── */
+.shop-header-row {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 10px; padding: 0 2px;
+}
+.shop-gold-label { font-size: 12px; color: var(--ash); }
+.shop-gold-value { font-family: var(--font-display); color: var(--gold); }
+.shop-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 14px;
+}
+.shop-item {
+  background: rgba(26,18,8,.8);
+  border: 1px solid var(--border);
+  padding: 10px 8px; cursor: pointer;
+  transition: all .15s;
+}
+.shop-item:hover:not(.owned):not(.cant-afford) { border-color: var(--gold-dim); background: rgba(42,26,16,.8); }
+.shop-item.owned       { border-color: var(--dharma); opacity: .7; cursor: default; }
+.shop-item.cant-afford { opacity: .5; cursor: not-allowed; }
+.shop-item-icon  { font-size: 22px; margin-bottom: 4px; }
+.shop-item-name  { font-family: var(--font-display); font-size: 10px; color: var(--gold); letter-spacing: .04em; margin-bottom: 3px; }
+.shop-item-desc  { font-size: 10px; color: var(--ash-light); margin-bottom: 6px; line-height: 1.4; }
+.shop-item-price { font-family: var(--font-display); font-size: 11px; }
+.price-gold      { color: var(--gold); }
+.price-blood     { color: var(--blood-light); }
+.price-owned     { color: var(--dharma-light); }
+
+/* ── SPY NETWORK ── */
+.spy-stats-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 12px;
+}
+.spy-stat-box {
+  background: rgba(26,18,8,.8); border: 1px solid var(--border);
+  padding: 10px; text-align: center;
+}
+.spy-stat-val   { font-family: var(--font-display); font-size: 20px; color: var(--gold); }
+.spy-stat-label { font-size: 10px; color: var(--ash); margin-top: 2px; }
+.spy-mission {
+  background: rgba(26,18,8,.7); border: 1px solid var(--border);
+  padding: 10px 12px; margin-bottom: 6px;
+  cursor: pointer; transition: all .2s;
+}
+.spy-mission:hover:not(.active-mission):not(.done-mission):not(.no-funds) {
+  border-color: var(--gold-dim); background: rgba(42,26,16,.7);
+}
+.spy-mission.active-mission { border-color: var(--gold-dark); cursor: default; }
+.spy-mission.done-mission   { border-color: var(--dharma);    cursor: default; opacity: .55; }
+.spy-mission.no-funds       { opacity: .5; cursor: not-allowed; }
+.spy-mission-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 4px;
+}
+.spy-mission-name   { font-family: var(--font-display); font-size: 11px; color: var(--parch-dim); letter-spacing: .04em; }
+.spy-mission-cost   { font-size: 10px; }
+.cost-gold   { color: var(--gold); }
+.cost-active { color: var(--gold-dim); }
+.cost-done   { color: var(--dharma-light); }
+.cost-broke  { color: var(--blood); }
+.spy-mission-desc { font-size: 11px; color: var(--ash-light); }
+
+/* ── QUEST LOG ── */
+.quest-card {
+  background: rgba(26,18,8,.8); border: 1px solid var(--border-gold);
+  padding: 12px; margin-bottom: 8px;
+}
+.quest-card-title { font-family: var(--font-display); font-size: 12px; color: var(--gold); margin-bottom: 4px; }
+.quest-card-desc  { font-size: 12px; color: var(--ash-light); margin-bottom: 8px; }
+.quest-step       { font-size: 11px; color: var(--dharma-light); }
+.quest-go-btn {
+  margin-top: 8px;
+  font-family: var(--font-display); font-size: 9px; letter-spacing: .08em;
+  color: var(--gold); background: none;
+  border: 1px solid var(--gold-dark); padding: 4px 10px; cursor: pointer;
+  transition: all .15s;
+}
+.quest-go-btn:hover { background: rgba(107,82,24,.2); }
+.quest-completed {
+  background: rgba(26,18,8,.5); border: 1px solid var(--border-dharma);
+  padding: 10px; margin-bottom: 6px; opacity: .7;
+}
+.quest-completed-title { font-family: var(--font-display); font-size: 11px; color: var(--dharma-light); }
+
+/* ── CODEX ── */
+.codex-entry {
+  background: rgba(26,18,8,.8); border: 1px solid var(--border);
+  padding: 14px; margin-bottom: 8px;
+}
+.codex-entry-header {
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 6px;
+}
+.codex-entry-icon  { font-size: 24px; }
+.codex-entry-title { font-family: var(--font-display); font-size: 13px; color: var(--gold); letter-spacing: .08em; }
+.codex-entry-body  { font-size: 12px; color: var(--ash-light); line-height: 1.6; }
+
+/* ── ACHIEVEMENTS ── */
+.achievement-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 14px;
+}
+.ach-card {
+  background: rgba(26,18,8,.8); border: 1px solid var(--border);
+  padding: 10px; transition: all .2s;
+}
+.ach-card.unlocked { border-color: var(--gold-dark); }
+.ach-card.locked   { opacity: .4; }
+.ach-card-title    { font-family: var(--font-display); font-size: 11px; color: var(--gold); margin-bottom: 4px; }
+.ach-card.locked .ach-card-title { color: var(--ash); }
+.ach-card-desc     { font-size: 10px; color: var(--ash-light); }
+
+/* ── TIMELINE ── */
+.timeline-entry {
+  display: flex; gap: 10px;
+  margin-bottom: 10px; padding-bottom: 10px;
+  border-bottom: 1px solid rgba(74,55,40,.2);
+}
+.timeline-num    { font-family: var(--font-display); font-size: 10px; color: var(--gold-dark); width: 20px; text-align: right; flex-shrink: 0; }
+.timeline-scene  { font-size: 10px; color: var(--ash); margin-bottom: 2px; font-family: var(--font-display); letter-spacing: .04em; }
+.timeline-choice { font-size: 12px; color: var(--parch-dim); }
