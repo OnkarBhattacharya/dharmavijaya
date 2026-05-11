@@ -19,6 +19,7 @@ const Combat = {
       nextScene,
       poisonTurns: 0,
       poisonDmg:   0,
+      fortifyTurns: 0,
     };
 
     /* Build combat overlay HTML */
@@ -39,6 +40,7 @@ const Combat = {
           <button class="ca-btn ca-mantra" onclick="Combat.act('mantra')" id="btn-mantra">🔮 MANTRA<span class="ca-cost">20 MP · Sacred dmg</span></button>
           <button class="ca-btn ca-dharma" onclick="Combat.act('dharma')">☸ DHARMA FORCE<span class="ca-cost">Scales with dharma</span></button>
           <button class="ca-btn ca-item"   onclick="Combat.act('item')">🌿 USE ITEM<span class="ca-cost">Healing herb / gem</span></button>
+          ${Combat._classActionBtn()}
           <button class="ca-btn ca-flee"   onclick="Combat.act('flee')">↩ RETREAT — withdraw from battle</button>
         </div>
       </div>`;
@@ -109,14 +111,18 @@ const Combat = {
           State.mp = Math.min(State.maxMp, State.mp + 30);
           State.inventory.splice(State.inventory.indexOf('soma_draught'), 1);
           Combat._log('Soma draught — restored 30 MP.', 'log-heal');
-        } else if (State.inventory.includes('naga_gem')) {
-          pDmg = 20;
-          Combat._log(`Naga Gem pulses — supernatural damage: ${pDmg}.`, 'log-dharma');
         } else if (State.inventory.includes('poison_vial')) {
+          // BUGFIX: poison_vial was not being consumed, so it could be applied indefinitely.
           State.combat.poisonTurns = 3;
           State.combat.poisonDmg  = 8;
+          State.inventory.splice(State.inventory.indexOf('poison_vial'), 1);
           Combat._log('Poison applied — 8 damage/turn for 3 turns.', 'log-dharma');
           dChange = -3;
+        } else if (State.inventory.includes('naga_gem')) {
+          // Naga Gem is a relic: treat it as a one-turn pulse without consuming the gem.
+          // (If you want it consumed, we can switch to splicing inventory here.)
+          pDmg = 20;
+          Combat._log(`Naga Gem pulses — supernatural damage: ${pDmg}.`, 'log-dharma');
         } else {
           Combat._log('No usable items in combat.', 'log-miss');
           return;
@@ -136,9 +142,49 @@ const Combat = {
         Combat._log('Retreat blocked!', 'log-hit');
         break;
       }
+      case 'class_action': {
+        switch (State.cls) {
+          case 'kshatriya': {
+            const rageCost = 10;
+            if (State.hp <= rageCost) { Combat._log('Not enough HP for Battle Rage.', 'log-miss'); return; }
+            State.hp -= rageCost;
+            pDmg    = Math.floor(State.attack * 1.8 + Math.random() * 20);
+            dChange = -3;
+            Combat._log(`BATTLE RAGE — ${pDmg} damage! (costs ${rageCost} HP)`, 'log-crit');
+            Audio.playSfx('hit');
+            break;
+          }
+          case 'bhikshu': {
+            pDmg    = Math.floor(20 + State.dharmaScore * 0.3);
+            dChange = 8;
+            eDmg    = 0;
+            Combat._log(`COMPASSION FIELD — ${e.name} loses ${pDmg} HP from inner conflict. No counter-strike.`, 'log-dharma');
+            Audio.playSfx('dharma');
+            break;
+          }
+          case 'amatya': {
+            State.combat.poisonTurns = 3;
+            State.combat.poisonDmg  = 10;
+            dChange = -2;
+            Combat._log('POISON STRIKE — 10 damage/turn for 3 turns applied.', 'log-dharma');
+            break;
+          }
+          case 'sthapati': {
+            State.combat.fortifyTurns = 2;
+            dChange = 3;
+            Combat._log('FORTIFY — Defense +15 for 2 turns.', 'log-dharma');
+            break;
+          }
+        }
+        break;
+      }
     }
 
-    /* Apply damage */
+    /* Apply damage — Sthapati fortify reduces incoming damage */
+    if (State.combat.fortifyTurns > 0) {
+      eDmg = Math.max(0, eDmg - 15);
+      State.combat.fortifyTurns--;
+    }
     State.combat.eHp = Math.max(0, State.combat.eHp - pDmg);
     State.hp         = Math.max(0, State.hp         - eDmg);
     State.dharmaScore = Math.max(0, Math.min(100, State.dharmaScore + dChange));
@@ -175,6 +221,17 @@ const Combat = {
       const ns = State.combat.nextScene;
       setTimeout(() => { Overlays.close('combat'); Engine.go(ns); }, 1400);
     }
+  },
+
+  /** Return the class-specific action button HTML */
+  _classActionBtn() {
+    const map = {
+      kshatriya: `<button class="ca-btn ca-dharma" onclick="Combat.act('class_action')">&#x1F525; BATTLE RAGE<span class="ca-cost">Costs 10 HP &middot; 1.8x attack</span></button>`,
+      bhikshu:   `<button class="ca-btn ca-dharma" onclick="Combat.act('class_action')">&#x2618; COMPASSION FIELD<span class="ca-cost">No counter &middot; dharma dmg</span></button>`,
+      amatya:    `<button class="ca-btn ca-dharma" onclick="Combat.act('class_action')">&#x1F9EA; POISON STRIKE<span class="ca-cost">10 dmg/turn &middot; 3 turns</span></button>`,
+      sthapati:  `<button class="ca-btn ca-dharma" onclick="Combat.act('class_action')">&#x1F3D7; FORTIFY<span class="ca-cost">Defense +15 &middot; 2 turns</span></button>`,
+    };
+    return map[State.cls] || '';
   },
 
   /** Add a line to the combat log */

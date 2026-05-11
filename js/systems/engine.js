@@ -65,9 +65,13 @@ const Engine = {
     const wrap = document.getElementById('choices-area');
     wrap.innerHTML = '';
     (scene.choices || []).forEach(ch => {
-      /* Filter class-exclusive and item-gated choices */
+      /* Filter class-exclusive, item-gated, and spoke-gated choices */
       if (ch.class       && ch.class       !== State.cls)             return;
       if (ch.requireItem && !State.inventory.includes(ch.requireItem)) return;
+      if (ch.requireSpoke) {
+        const { name, min } = ch.requireSpoke;
+        if ((State.spokes[name] || 0) < min) return;
+      }
 
       const btn = document.createElement('button');
       btn.className = 'choice-item fade-in';
@@ -81,6 +85,7 @@ const Engine = {
       if (ch.dharmaLoss > 0) metas.push(`<span class="choice-meta meta-blood">−${ch.dharmaLoss} dharma</span>`);
       if (ch.class)          metas.push(`<span class="choice-meta meta-class">${CLASSES_DATA[ch.class]?.name} only</span>`);
       if (ch.requireItem)    metas.push(`<span class="choice-meta meta-class">Needs: ${ITEMS_DATA[ch.requireItem]?.name}</span>`);
+      if (ch.requireSpoke)   metas.push(`<span class="choice-meta meta-class">${ch.requireSpoke.name} ≥${ch.requireSpoke.min}</span>`);
       btn.innerHTML = metas.join('') + ch.text;
 
       btn.onclick = () => Engine._choose(ch);
@@ -99,11 +104,13 @@ const Engine = {
     if (ch.dharmaLoss) { State.dharmaScore = Math.max(0,   State.dharmaScore - ch.dharmaLoss); HUD.adjustSpokes(ch.dharmaLoss, false); }
     if (ch.item && !State.inventory.includes(ch.item)) {
       State.inventory.push(ch.item);
+      State.applyItemEffect(ch.item);
       UI.notify(`Acquired: ${ITEMS_DATA[ch.item]?.name || ch.item}`, 'gold');
     }
 
-    /* Side-quest completion hook */
-    if (ch.onComplete) Quests.complete(ch.onComplete);
+    /* Side-quest hooks */
+    if (ch.questAdvance) Quests.advance(ch.questAdvance);
+    if (ch.onComplete)   Quests.complete(ch.onComplete);
 
     State.journal.push({ scene: State.scene, choice: ch.text.substring(0, 60) });
     State.choiceCount++;

@@ -89,6 +89,7 @@ const State = {
     }
     if (c.item && !this.inventory.includes(c.item)) {
       this.inventory.push(c.item);
+      this.applyItemEffect(c.item);
       UI.notify(`Acquired: ${ITEMS_DATA[c.item]?.name || c.item}`, 'gold');
     }
     if (c.lore  && !this.lore.includes(c.lore))  {
@@ -103,6 +104,18 @@ const State = {
     if (c.flag)  this.flags[c.flag]  = true;
     if (c.flag2) this.flags[c.flag2] = true;
     if (c.act)   this.act = c.act;
+  },
+
+  /** Apply a single item's effect fields to character stats (one-time) */
+  applyItemEffect(key) {
+    const item = ITEMS_DATA[key];
+    if (!item?.effect) return;
+    const e = item.effect;
+    if (e.attack)     this.attack   += e.attack;
+    if (e.defense)    this.defense  += e.defense;
+    if (e.hp)         { this.maxHp  += e.hp;  this.hp  = Math.min(this.hp  + e.hp,  this.maxHp); }
+    if (e.mp)         { this.maxMp  += e.mp;  this.mp  = Math.min(this.mp  + e.mp,  this.maxMp); }
+    if (e.dharmaBonus){ this.dharmaScore = Math.min(100, this.dharmaScore + e.dharmaBonus); }
   },
 
   /** Initialise state for a newly selected class */
@@ -143,6 +156,9 @@ const State = {
       Virya:    Math.min(100, base + 3),
       Upekkha:  Math.max(0, base - 2),
     };
+
+    /* Apply starting item effects to base stats */
+    d.items.forEach(key => this.applyItemEffect(key));
   },
 
   /** Serialise for saving (strips transient fields) */

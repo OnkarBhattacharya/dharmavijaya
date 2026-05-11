@@ -18,6 +18,7 @@ const Debate = {
       maraHp:        100,
       timerInterval: null,
       timeLeft:      30,
+      _scrollUsed:   false,
     };
 
     /* Build overlay HTML */
@@ -141,17 +142,32 @@ const Debate = {
   /** Timer that advances to wrong answer if player idles */
   _startTimer(db, roundIdx) {
     Debate._clearTimer();
-    State.debate.timeLeft = 30;
+    const timeLimits = { bhikshu: 45, amatya: 30, kshatriya: 22, sthapati: 28 };
+    const limit = timeLimits[State.cls] || 30;
+    State.debate.timeLeft = limit;
     const fill = document.getElementById('timer-fill');
     const num  = document.getElementById('timer-num');
 
+    /* dharma_scroll reveals the correct answer hint for one round */
+    if (State.inventory.includes('dharma_scroll') && !State.debate._scrollUsed) {
+      State.debate._scrollUsed = true;
+      const round = db.rounds[roundIdx];
+      const correctIdx = round.choices.findIndex(c => c.correct);
+      if (correctIdx >= 0) {
+        const btns = document.querySelectorAll('#debate-choices .debate-choice');
+        if (btns[correctIdx]) {
+          btns[correctIdx].style.borderColor = 'var(--dharma-light)';
+          btns[correctIdx].title = 'Dharma Scroll: this argument is strongest';
+        }
+      }
+    }
+
     State.debate.timerInterval = setInterval(() => {
       State.debate.timeLeft--;
-      if (fill) fill.style.width = (State.debate.timeLeft / 30 * 100) + '%';
+      if (fill) fill.style.width = (State.debate.timeLeft / limit * 100) + '%';
       if (num)  num.textContent  = State.debate.timeLeft;
       if (State.debate.timeLeft <= 0) {
         Debate._clearTimer();
-        /* Auto-select the last (wrong) choice on timeout */
         const round  = db.rounds[roundIdx];
         const wrong  = round.choices[round.choices.length - 1];
         Debate._resolve(db, round, wrong);

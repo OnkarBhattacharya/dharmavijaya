@@ -315,6 +315,17 @@ const Quests = {
     });
   },
 
+  advance(questId) {
+    const aq = State.activeQuests[questId];
+    if (!aq) return;
+    const q = SIDE_QUESTS.find(x => x.id === questId);
+    if (!q) return;
+    const nextStep = aq.currentStep + 1;
+    if (nextStep >= q.steps.length) return; // complete() handles final step
+    aq.currentStep = nextStep;
+    UI.notify(`📋 Quest updated: ${q.title} — ${q.steps[nextStep].text}`, 'lore', 4000);
+  },
+
   complete(questId) {
     if (!State.activeQuests[questId]) return;
     const q = SIDE_QUESTS.find(x => x.id === questId);
