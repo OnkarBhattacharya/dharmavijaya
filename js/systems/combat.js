@@ -156,7 +156,7 @@ const Combat = {
       State.hp = 1;
       State.combat.active = false;
       Overlays.close('combat');
-      document.getElementById('go-score').textContent = State.dharmaScore;
+      Overlays.buildGameOver();
       Overlays.open('gameover');
       return;
     }

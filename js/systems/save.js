@@ -41,6 +41,28 @@ const Save = {
     State.load(data);
     Overlays.closeAll();
     UI.showScreen('game');
+
+    /* Rebuild sidebar pane shells if missing (e.g. loading from title screen) */
+    if (!document.getElementById('dharma-wheel-svg')) {
+      document.getElementById('pane-wheel').innerHTML = `
+        <div class="wheel-container">
+          <svg id="dharma-wheel-svg" viewBox="0 0 120 120"></svg>
+          <div class="wheel-score" id="wheel-score">${State.dharmaScore}</div>
+          <div class="wheel-label">Dharma Score</div>
+        </div>
+        <div id="spokes-container"></div>`;
+    }
+    if (!document.getElementById('stats-list')) {
+      document.getElementById('pane-stats').innerHTML = `<div class="pane-section-title">Character</div><div id="stats-list"></div>`;
+    }
+    if (!document.getElementById('inv-grid')) {
+      document.getElementById('pane-inv').innerHTML = `<div class="pane-section-title">Possessions</div><div class="inv-grid" id="inv-grid"></div>`;
+    }
+    if (!document.getElementById('lore-container')) {
+      document.getElementById('pane-lore').innerHTML = `<div class="pane-section-title">Chronicles</div><div id="lore-container"></div>`;
+    }
+
+    Overlays.buildGameOver();
     HUD.update();
     HUD.updateDharmaWheel();
     HUD.updateInventory();
