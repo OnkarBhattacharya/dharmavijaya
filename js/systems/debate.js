@@ -169,7 +169,7 @@ const Debate = {
       if (State.debate.timeLeft <= 0) {
         Debate._clearTimer();
         const round  = db.rounds[roundIdx];
-        const wrong  = round.choices[round.choices.length - 1];
+        const wrong  = round.choices.find(c => c.wrong) || round.choices[round.choices.length - 1];
         Debate._resolve(db, round, wrong);
       }
     }, 1000);

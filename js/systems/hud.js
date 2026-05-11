@@ -94,7 +94,15 @@ const HUD = {
   _buildWheelPane() {
     const pane = document.getElementById('pane-wheel');
     if (!pane) return;
+    const clsIcon = CLASSES_DATA[State.cls];
     pane.innerHTML = `
+      <div class="char-portrait-row">
+        <div class="char-portrait-icon">${clsIcon?.icon || '☸'}</div>
+        <div class="char-portrait-info">
+          <div class="char-portrait-name">${this._esc(State.name)}</div>
+          <div class="char-portrait-role">${this._esc(State.tagline)}</div>
+        </div>
+      </div>
       <div class="wheel-container">
         <svg id="dharma-wheel-svg" viewBox="0 0 120 120"></svg>
         <div class="wheel-score" id="wheel-score">${State.dharmaScore}</div>

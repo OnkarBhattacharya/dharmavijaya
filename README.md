@@ -10,15 +10,20 @@ A narrative RPG set in 3rd century BCE India. Serve Emperor Ashoka across three 
 
 - **4 playable classes** — Kshatriya (warrior), Bhikshu (monk), Amatya (spy), Sthapati (builder)
 - **3 full acts** with 80+ branching scenes
-- **Mara philosophical debate system** — timed argument rounds with real consequences
-- **Dharma Wheel** — 8-spoke alignment tracker (Ahimsa, Satya, Dana, Shila, Karuna, Prajna, Virya, Upekkha)
-- **Turn-based combat** with 5 action types
-- **Sanstha spy network** — deployable intelligence missions
-- **Side quest system** — 3 fully voiced quests
+- **Mara philosophical debate system** — timed argument rounds with real consequences, Dharma Scroll hint system
+- **Dharma Wheel** — 8-spoke alignment tracker (Ahimsa, Satya, Dana, Shila, Karuna, Prajna, Virya, Upekkha) with SVG visualization
+- **Turn-based combat** — 5 action types + class-specific abilities (Battle Rage, Compassion Field, Poison Strike, Fortify)
+- **Sanstha spy network** — deployable intelligence missions with asynchronous completion
+- **Side quest system** — 3 fully voiced quests with multi-step progression
 - **Merchant, codex, achievement, chronicle log** systems
 - **5 distinct endings** based on dharma score and key flags
-- **localStorage save** — 3 slots
+- **Typewriter text effect** — narrative dialogue revealed character-by-character with click-to-skip
+- **Character portrait** — class icon and identity shown in the sidebar
+- **Auto-save** — game saves automatically on act transitions; auto-save slot shown in "Continue Journey"
+- **localStorage save** — 3 manual slots + 1 auto-save slot
 - **Web Audio API** ambient sound (optional)
+- **Keyboard shortcuts** — number keys (1-9) for choices, M/S/Q/C/I/L for panels
+- **Mobile responsive** — adaptive layout for small screens with bottom-sheet sidebar
 - **Zero dependencies** — pure HTML/CSS/JS, no build step
 
 ---
@@ -31,11 +36,11 @@ dharmavijaya/
 │
 ├── css/
 │   ├── variables.css       ← Design tokens (colours, fonts, spacing)
-│   ├── base.css            ← Reset, body, utility classes
-│   ├── animations.css      ← All @keyframes
+│   ├── base.css            ← Reset, body, utility classes, mobile responsive
+│   ├── animations.css      ← All @keyframes + typewriter cursor + combat effects
 │   ├── screens.css         ← Title screen, class select
 │   ├── hud.css             ← HUD, game layout, scene panel, choices
-│   ├── sidebar.css         ← Sidebar tabs, wheel, inventory, lore
+│   ├── sidebar.css         ← Sidebar tabs, wheel, inventory, lore, portrait
 │   ├── overlays.css        ← Combat, debate, map, save, ending
 │   └── components.css      ← Merchant, spy, quests, codex, achievements
 │
@@ -62,7 +67,7 @@ dharmavijaya/
 │   │
 │   └── systems/            ← Engine — rarely needs editing
 │       ├── state.js        ← Central game state
-│       ├── engine.js       ← Scene router, choice processor
+│       ├── engine.js       ← Scene router, choice processor, typewriter
 │       ├── combat.js       ← Turn-based combat
 │       ├── debate.js       ← Philosophical debate system
 │       ├── audio.js        ← Web Audio ambiance + SFX
@@ -154,6 +159,7 @@ Then use `art: 'my_location'` in any scene.
 
 | Key | Action |
 |-----|--------|
+| `1` – `9` | Select choice #1–9 |
 | `M` | Toggle map |
 | `S` | Save game |
 | `Q` | Quest log |
@@ -166,9 +172,9 @@ Then use `art: 'my_location'` in any scene.
 
 ## Save System
 
-The game auto-saves to `localStorage` in 3 named slots. Saves survive browser refreshes but not private/incognito windows.
+The game auto-saves to `localStorage` in 3 manual slots plus 1 auto-save slot. Auto-save triggers on act transitions and is displayed with an ⚡ badge in the "Continue Journey" dialog. Saves survive browser refreshes but not private/incognito windows.
 
-Save data is schema-validated on load — slots with missing or malformed required fields (`dharmaScore`, `scene`, `act`) are rejected silently.
+Save data is schema-validated on load — slots with missing or malformed required fields (`dharmaScore`, `scene`, `act`) are rejected silently. Prototype-pollution keys (`__proto__`, `constructor`, `prototype`) are explicitly blocked.
 
 ---
 
@@ -181,14 +187,18 @@ The following hardening was applied in the last audit pass:
 - **Prototype pollution guard** — `state.js` `load()` only writes keys that already exist on the `State` object; `hud.js` `adjustSpokes()` uses `hasOwnProperty` before writing spoke values
 - **XSS sanitization** — all save-derived or user-influenced strings (save slot names, map location names, intel entries, journal entries, ending titles) are HTML-escaped before `innerHTML` insertion in `overlays.js`, `hud.js`, and `ui.js`
 - **Debate injection fix** — the continue-round button in `debate.js` uses a DOM event listener instead of an inline `onclick` string that previously embedded `State.debate.id` directly
-- **Combat log** — `combat.js` `_log()` uses `textContent` instead of `innerHTML`
+- **Combat log** — `combat.js` `_log()` uses `innerHTML` for rich text rendering; only authored content is inserted (no user input)
 - **Debate timer pause** — `debate.js` pauses the round timer on `visibilitychange` (tab blur) to prevent unfair timeouts
+- **Infinite loop guard** — `engine.js` includes a depth counter (`_guardDepth` / `_guardMax`) that breaks circular scene routing
 
 ### Known bugs fixed
 
 - **All buttons unresponsive** — `script-src 'self'` (without `'unsafe-inline'`) in the CSP blocked every inline `onclick` handler silently. Fixed by adding `'unsafe-inline'` to `script-src` in `index.html`.
 - **Crash on player death in combat** — `combat.js` accessed `#go-score` directly before the game-over overlay HTML existed. Fixed by calling `Overlays.buildGameOver()` before opening the overlay.
 - **Blank sidebar on save-load from title screen** — `Save.load()` called HUD update methods before the sidebar pane shells were in the DOM (they are normally built by `Game.selectClass()`). Fixed by rebuilding missing pane shells inside `Save.load()`.
+- **Combat log HTML rendering** — `combat._log()` used `textContent` which rendered `<em>` tags as raw text. Fixed by switching to `innerHTML`.
+- **Debate timer fallback** — timer expiry assumed the last choice index was always wrong; now correctly searches for `c.wrong` property with graceful fallback.
+- **Debate timer leak** — closing the debate overlay without finishing left the timer interval running. Fixed by cleaning up interval in `Overlays.close('debate')`.
 
 ---
 

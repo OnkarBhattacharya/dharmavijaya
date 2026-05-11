@@ -240,7 +240,7 @@ const Combat = {
     if (!log) return;
     const d = document.createElement('div');
     d.className = cls || '';
-    d.textContent = msg;
+    d.innerHTML = msg;
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
   },

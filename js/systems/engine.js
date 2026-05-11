@@ -16,17 +16,36 @@ const SCENES = Object.assign(
 );
 
 const Engine = {
+  _guardDepth: 0,
+  _guardMax: 50,
 
   /** Navigate to a scene by key */
   go(id) {
-    if (id === '__ending__') { Overlays.showEnding(); return; }
+    /* Guard against infinite loops */
+    if (this._guardDepth > this._guardMax) {
+      console.error('Engine.go — infinite loop detected, forcing reset');
+      this._guardDepth = 0;
+      Engine.go('intro');
+      return;
+    }
+    this._guardDepth++;
+
+    if (id === '__ending__') { Overlays.showEnding(); this._guardDepth = 0; return; }
 
     const scene = SCENES[id];
-    if (!scene) { console.warn('Engine.go — unknown scene:', id); Engine.go('intro'); return; }
+    if (!scene) {
+      console.warn('Engine.go — unknown scene:', id);
+      this._guardDepth = 0;
+      Engine.go('intro');
+      return;
+    }
 
     /* Save current scene for death-continue */
     State.scene      = id;
     State.deathScene = id;
+
+    /* Reset guard depth after successful render */
+    this._guardDepth = 0;
 
     /* Close any open overlay */
     Overlays.closeAll();
@@ -38,7 +57,12 @@ const Engine = {
     if (scene.act) {
       const map = { 'ACT I — THE EMPIRE':1, 'ACT II — THE SILENCE':2, 'ACT III — DHARMASHOKA':3 };
       const n = map[scene.act];
-      if (n && n > State.act) State.act = n;
+      if (n && n > State.act) {
+        State.act = n;
+        /* Auto-save on act transitions */
+        Save.write('auto');
+        UI.notify(`💾 Act ${n} — auto-saved`, 'gold');
+      }
     }
 
     /* Special scene types */
@@ -56,10 +80,14 @@ const Engine = {
     document.getElementById('scene-loc').textContent      = scene.loc || '';
     document.getElementById('scene-act-badge').textContent = scene.act || '';
 
-    /* ── Render story text ── */
+    /* ── Render story text with typewriter effect ── */
     const bodyEl = document.getElementById('story-body');
-    bodyEl.innerHTML = `<div class="fade-in">${scene.text || ''}</div>`;
+    const storyText = scene.text || '';
+    bodyEl.innerHTML = `<div class="scene-text-transition"><div class="story-typewriter" id="story-typewriter"></div></div>`;
     document.getElementById('story-area').scrollTop = 0;
+
+    /* Start typewriter animation */
+    Engine._typewrite('story-typewriter', storyText, 20);
 
     /* ── Render choices ── */
     const wrap = document.getElementById('choices-area');
@@ -118,6 +146,42 @@ const Engine = {
     HUD.update();
     Audio.playSfx('choice');
     Engine.go(ch.next);
+  },
+
+  /** Write text character by character into a container */
+  _typewrite(elId, text, speed = 12) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    Engine._skipTypewrite = false;
+    el.innerHTML = '';
+    let i = 0;
+    const writeNext = () => {
+      if (Engine._skipTypewrite) {
+        el.innerHTML = text;
+        return;
+      }
+      if (i >= text.length) return;
+      /* Handle HTML tags — insert them atomically */
+      if (text[i] === '<') {
+        const end = text.indexOf('>', i);
+        if (end !== -1) {
+          el.innerHTML += text.substring(i, end + 1);
+          i = end + 1;
+          setTimeout(writeNext, speed);
+          return;
+        }
+      }
+      el.innerHTML += text[i++];
+      setTimeout(writeNext, speed);
+    };
+    setTimeout(writeNext, 80);
+
+    /* Clicking story area skips typewriter */
+    const storyArea = document.getElementById('story-area');
+    const skipHandler = () => { Engine._skipTypewrite = true; };
+    storyArea.removeEventListener('click', storyArea._twSkip);
+    storyArea.addEventListener('click', skipHandler, { once: true });
+    storyArea._twSkip = skipHandler;
   },
 
   /** Hooks that fire after every scene transition */

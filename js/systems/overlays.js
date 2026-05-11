@@ -24,6 +24,11 @@ const Overlays = {
 
   close(id) {
     document.getElementById(`overlay-${id}`)?.classList.remove('active');
+    /* Kill debate timer if closing debate overlay */
+    if (id === 'debate' && State.debate?.timerInterval) {
+      clearInterval(State.debate.timerInterval);
+      State.debate.timerInterval = null;
+    }
   },
 
   closeAll() {
@@ -83,15 +88,42 @@ const Overlays = {
     const ov = document.getElementById('overlay-save');
     if (!ov) return;
 
+    const isLoad = mode === 'load';
     ov.innerHTML = `
       <div class="save-panel">
-        <div class="save-title">${mode === 'save' ? 'SAVE JOURNEY' : 'CONTINUE JOURNEY'}</div>
+        <div class="save-title">${isLoad ? 'CONTINUE JOURNEY' : 'SAVE JOURNEY'}</div>
         <div id="save-slots"></div>
         <button class="btn-main" style="width:100%;margin-top:8px;font-size:10px"
           onclick="Overlays.close('save')">CANCEL</button>
       </div>`;
 
     const cont = document.getElementById('save-slots');
+
+    /* Show auto-save first in load mode */
+    if (isLoad) {
+      const autoMeta = Save.meta('auto');
+      const autoSlot = document.createElement('div');
+      autoSlot.className = 'save-slot save-slot-auto';
+      if (autoMeta) {
+        autoSlot.innerHTML = `
+          <div class="save-slot-num">⚡</div>
+          <div class="save-slot-info">
+            <div class="save-slot-name">${this._esc(autoMeta.name)} — ${this._esc(autoMeta.tagline)}</div>
+            <div class="save-slot-meta">Act ${this._esc(String(autoMeta.act))} · Dharma ${this._esc(String(autoMeta.dharma))} · Auto-save</div>
+          </div>
+          <div class="save-slot-action">LOAD</div>`;
+        autoSlot.onclick = () => { Save.load('auto'); };
+      } else {
+        autoSlot.innerHTML = `
+          <div class="save-slot-num">⚡</div>
+          <div class="save-slot-info">
+            <div class="save-slot-name" style="color:var(--stone)">No auto-save</div>
+          </div>
+          <div class="save-slot-action">—</div>`;
+      }
+      cont.appendChild(autoSlot);
+    }
+
     for (let i = 1; i <= 3; i++) {
       const meta = Save.meta(i);
       const slot = document.createElement('div');
@@ -104,10 +136,10 @@ const Overlays = {
             <div class="save-slot-name">${this._esc(meta.name)} — ${this._esc(meta.tagline)}</div>
             <div class="save-slot-meta">Act ${this._esc(String(meta.act))} · Dharma ${this._esc(String(meta.dharma))} · ${this._esc(meta.date)}</div>
           </div>
-          <div class="save-slot-action">${mode === 'save' ? 'OVERWRITE' : 'LOAD'}</div>`;
+          <div class="save-slot-action">${isLoad ? 'LOAD' : 'OVERWRITE'}</div>`;
         slot.onclick = () => {
-          if (mode === 'save') { Save.write(i); this.close('save'); }
-          else                 { Save.load(i); }
+          if (isLoad) { Save.load(i); }
+          else        { Save.write(i); this.close('save'); }
         };
       } else {
         slot.innerHTML = `
@@ -115,8 +147,8 @@ const Overlays = {
           <div class="save-slot-info">
             <div class="save-slot-name" style="color:var(--stone)">Empty Slot</div>
           </div>
-          <div class="save-slot-action">${mode === 'save' ? 'SAVE HERE' : '—'}</div>`;
-        if (mode === 'save') slot.onclick = () => { Save.write(i); this.close('save'); };
+          <div class="save-slot-action">${isLoad ? '—' : 'SAVE HERE'}</div>`;
+        if (!isLoad) slot.onclick = () => { Save.write(i); this.close('save'); };
       }
       cont.appendChild(slot);
     }

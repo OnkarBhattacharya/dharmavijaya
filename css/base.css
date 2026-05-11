@@ -65,3 +65,95 @@ body {
   padding-bottom: 4px;
   border-bottom: 1px solid var(--border);
 }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .game-body {
+    grid-template-columns: 1fr !important;
+  }
+  .sidebar {
+    display: none !important;
+  }
+  .hud-vitals .vital-track {
+    width: 48px !important;
+  }
+  .scene-art {
+    height: 120px !important;
+  }
+  .story-body {
+    font-size: 14px !important;
+  }
+  .bottom-bar {
+    gap: 4px !important;
+    padding: 4px 6px !important;
+  }
+  .bb-btn {
+    font-size: 8px !important;
+    padding: 3px 6px !important;
+  }
+  .vital-track {
+    width: 48px !important;
+  }
+  .hud-gold, .hud-score {
+    font-size: 10px !important;
+  }
+  .choice-meta {
+    float: none !important;
+    display: inline !important;
+    font-size: 9px !important;
+  }
+  .class-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .shop-grid,
+  .achievement-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .inv-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .spy-stats-row {
+    grid-template-columns: 1fr !important;
+  }
+  .panel-box {
+    max-width: 100% !important;
+  }
+  #screen-title {
+    padding: 20px !important;
+  }
+  .title-dharma-wheel {
+    width: 120px !important;
+    height: 120px !important;
+  }
+  .title-main {
+    font-size: clamp(24px, 6vw, 36px) !important;
+  }
+}
+
+/* Mobile sidebar: show as bottom sheet on small screens */
+@media (max-width: 768px) {
+  .sidebar-pane.active {
+    display: block;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    max-height: 40vh;
+    z-index: 60;
+    background: var(--panel-bg);
+    border-top: 1px solid var(--border-gold);
+    padding: 12px;
+    overflow-y: auto;
+    animation: fadeUp .3s ease;
+  }
+  .sidebar-tabs {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 70;
+    display: flex;
+    background: var(--ink);
+    border-top: 1px solid var(--border);
+  }
+  .stab {
+    padding: 10px 4px !important;
+    font-size: 10px !important;
+  }
+}

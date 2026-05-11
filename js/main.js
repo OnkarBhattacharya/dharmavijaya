@@ -112,6 +112,14 @@ document.addEventListener('keydown', e => {
     case 'c': case 'C': if (gameActive) UI.openCodex();                break;
     case 'i': case 'I': if (gameActive) UI.switchTab('inv',  document.querySelector('.stab:nth-child(3)')); break;
     case 'l': case 'L': if (gameActive) UI.switchTab('lore', document.querySelector('.stab:nth-child(4)')); break;
+  case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
+    if (gameActive && !document.querySelector('.overlay.active, .panel-overlay.active')) {
+      const idx = parseInt(e.key) - 1;
+      const btns = document.querySelectorAll('#choices-area .choice-item');
+      if (btns[idx]) btns[idx].click();
+    }
+    break;
+  }
   }
 });
 

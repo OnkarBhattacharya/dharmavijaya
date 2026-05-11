@@ -30,3 +30,63 @@
   80% { opacity:1 }
   100%{ opacity:0; transform:translateX(-50%) translateY(10px) }
 }
+
+/* ── Typewriter cursor ── */
+@keyframes blink { 0%,100%{ opacity:1 } 50%{ opacity:0 } }
+
+/* ── Scene text transition ── */
+.scene-text-transition {
+  animation: fadeIn .45s ease both;
+}
+
+.story-typewriter::after {
+  content: '▍';
+  display: inline;
+  animation: blink .8s step-end infinite;
+  opacity: .5;
+  color: var(--gold-dim);
+}
+
+/* ── Combat HP bar hit flash ── */
+.log-hit   { animation: logFlash 1s ease; }
+.log-crit  { animation: logFlashCrit .8s ease; }
+.log-dharma{ animation: logFlashDharma .8s ease; }
+
+@keyframes logFlashCrit {
+  0%   { background:rgba(139,26,26,.3) }
+  100% { background:transparent }
+}
+@keyframes logFlashDharma {
+  0%   { background:rgba(46,125,110,.25) }
+  100% { background:transparent }
+}
+@keyframes logFlash {
+  0%   { background:rgba(74,55,40,.2) }
+  100% { background:transparent }
+}
+
+/* ── Combat entry bounce ── */
+.combat-scene { animation: combatEntry .4s ease both; }
+.enemy-glyph  { display: inline-block; animation: float 3s ease-in-out infinite; }
+
+/* ── Choice hover glow feedback ── */
+.choice-item {
+  transition: all .2s ease;
+}
+.choice-item:hover {
+  background: rgba(201,168,76,.08);
+  border-color: var(--gold-dim);
+  transform: translateX(4px);
+}
+.ci-dharma:hover {
+  border-color: var(--dharma-mid);
+  background: rgba(46,125,110,.08);
+}
+.ci-blood:hover {
+  border-color: var(--blood-mid);
+  background: rgba(139,26,26,.08);
+}
+.ci-intel:hover {
+  border-color: var(--ash-light);
+  background: rgba(122,98,72,.08);
+}

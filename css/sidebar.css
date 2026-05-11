@@ -66,3 +66,37 @@
 .lore-title        { font-family: var(--font-display); font-size: 11px; color: var(--gold); letter-spacing: .05em; margin-bottom: 4px; }
 .lore-body         { font-size: 12px; color: var(--ash-light); line-height: 1.5; }
 .lore-empty        { font-size: 12px; color: var(--stone); font-style: italic; }
+
+/* ── Character Portrait (in wheel tab) ── */
+.char-portrait-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.char-portrait-icon {
+  font-size: 32px; line-height: 1;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(26,18,8,.6); border: 1px solid var(--border);
+  border-radius: 50%;
+}
+.char-portrait-info {
+  flex: 1; min-width: 0;
+}
+.char-portrait-name {
+  font-family: var(--font-display); font-size: 13px;
+  color: var(--gold); letter-spacing: .06em;
+}
+.char-portrait-role {
+  font-size: 10px; color: var(--ash);
+  margin-top: 1px;
+}
+
+/* ── Auto-save slot styling ── */
+.save-slot-auto {
+  border-color: var(--dharma-pale) !important;
+  background: rgba(46,125,110,.06) !important;
+}
+.save-slot-auto .save-slot-num {
+  color: var(--dharma-light) !important;
+}
