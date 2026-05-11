@@ -111,11 +111,14 @@ const Debate = {
 
     /* Continue button */
     const nextRound = State.debate.round + 1;
-    document.getElementById('debate-choices').innerHTML =
-      `<button class="debate-choice" onclick="Debate._loadRound(DEBATES['${State.debate.id}'], ${nextRound})"
-        style="text-align:center;border-color:var(--gold-dark);color:var(--gold)">
-        Continue the debate →
-      </button>`;
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'debate-choice';
+    continueBtn.style.cssText = 'text-align:center;border-color:var(--gold-dark);color:var(--gold)';
+    continueBtn.textContent = 'Continue the debate \u2192';
+    continueBtn.onclick = () => Debate._loadRound(db, nextRound);
+    const choicesEl2 = document.getElementById('debate-choices');
+    choicesEl2.innerHTML = '';
+    choicesEl2.appendChild(continueBtn);
   },
 
   /** Wrap up and route to outcome scene */
@@ -174,3 +177,14 @@ const Debate = {
 
 /* Expose for inline onclick */
 window.Debate = Debate;
+
+/* Pause debate timer when tab loses focus */
+document.addEventListener('visibilitychange', () => {
+  if (!State.debate?.active) return;
+  if (document.hidden) {
+    Debate._clearTimer();
+  } else {
+    const db = DEBATES[State.debate.id];
+    if (db) Debate._startTimer(db, State.debate.round);
+  }
+});

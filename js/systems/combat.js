@@ -183,7 +183,7 @@ const Combat = {
     if (!log) return;
     const d = document.createElement('div');
     d.className = cls || '';
-    d.innerHTML = msg;
+    d.textContent = msg;
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
   },

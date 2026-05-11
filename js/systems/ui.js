@@ -7,6 +7,12 @@
 
 const UI = {
 
+    _esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  },
+
   /* ─────────────────────────────────────────────
      Screen management
   ───────────────────────────────────────────── */
@@ -258,8 +264,8 @@ const UI = {
           <div class="timeline-entry">
             <div class="timeline-num">${State.journal.length - i}</div>
             <div>
-              <div class="timeline-scene">${e.scene}</div>
-              <div class="timeline-choice">${e.choice}</div>
+              <div class="timeline-scene">${this._esc(e.scene)}</div>
+              <div class="timeline-choice">${this._esc(e.choice)}</div>
             </div>
           </div>`).join('');
       return `

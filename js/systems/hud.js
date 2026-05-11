@@ -5,6 +5,12 @@
 
 const HUD = {
 
+  _esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  },
+
   /** Refresh all HUD elements */
   update() {
     this._set('hud-name',         State.name);
@@ -25,6 +31,7 @@ const HUD = {
     const keys  = Object.keys(State.spokes);
     const count = positive ? 3 : 2;
     [...keys].sort(() => Math.random() - 0.5).slice(0, count).forEach(k => {
+      if (!Object.prototype.hasOwnProperty.call(State.spokes, k)) return;
       const change = (delta / count) * (positive ? 1 : -1);
       State.spokes[k] = Math.max(0, Math.min(100, State.spokes[k] + change));
     });
@@ -166,7 +173,7 @@ const HUD = {
         ${State.intel.length === 0
           ? '<div style="font-size:11px;color:var(--stone);font-style:italic">No intelligence gathered.</div>'
           : State.intel.slice(-5).reverse().map(entry =>
-              `<div class="intel-item"><div class="intel-body">${entry}</div></div>`
+              `<div class="intel-item"><div class="intel-body">${this._esc(entry)}</div></div>`
             ).join('')}
       </div>`;
   },

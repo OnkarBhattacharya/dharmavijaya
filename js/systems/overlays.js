@@ -8,6 +8,16 @@
 
 const Overlays = {
 
+  /** Escape a string for safe innerHTML insertion */
+  _esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  },
+
   open(id) {
     document.getElementById(`overlay-${id}`)?.classList.add('active');
   },
@@ -41,8 +51,8 @@ const Overlays = {
         : '';
       return `<div class="${cls}" ${click}>
         <div class="map-loc-icon">${loc.icon}</div>
-        <div class="map-loc-name">${loc.name}</div>
-        <div class="map-loc-sub">${loc.unlocked ? loc.sub : '🔒 Locked'}</div>
+        <div class="map-loc-name">${this._esc(loc.name)}</div>
+        <div class="map-loc-sub">${loc.unlocked ? this._esc(loc.sub) : '🔒 Locked'}</div>
       </div>`;
     }).join('');
   },
@@ -91,8 +101,8 @@ const Overlays = {
         slot.innerHTML = `
           <div class="save-slot-num">${i}</div>
           <div class="save-slot-info">
-            <div class="save-slot-name">${meta.name} — ${meta.tagline}</div>
-            <div class="save-slot-meta">Act ${meta.act} · Dharma ${meta.dharma} · ${meta.date}</div>
+            <div class="save-slot-name">${this._esc(meta.name)} — ${this._esc(meta.tagline)}</div>
+            <div class="save-slot-meta">Act ${this._esc(String(meta.act))} · Dharma ${this._esc(String(meta.dharma))} · ${this._esc(meta.date)}</div>
           </div>
           <div class="save-slot-action">${mode === 'save' ? 'OVERWRITE' : 'LOAD'}</div>`;
         slot.onclick = () => {
@@ -147,8 +157,8 @@ const Overlays = {
     ov.innerHTML = `
       <div class="ending-container">
         <div class="ending-icon">${end.icon}</div>
-        <div class="ending-title" style="color:${end.color}">${end.title}</div>
-        <div class="ending-dharma-label">${end.dharmaLabel}</div>
+        <div class="ending-title" style="color:${this._esc(end.color)}">${this._esc(end.title)}</div>
+        <div class="ending-dharma-label">${this._esc(end.dharmaLabel)}</div>
         <div class="divider" style="margin:0 auto 16px"></div>
         <div class="ending-text">${end.text}</div>
         <div class="ending-stats">

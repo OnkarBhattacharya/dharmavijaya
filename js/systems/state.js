@@ -159,9 +159,11 @@ const State = {
 
   /** Load from a saved snapshot */
   load(snapshot) {
-    const skip = new Set(['combat', 'debate', 'serialise', 'load', 'initClass', 'applyChanges']);
+    const skip = new Set(['combat', 'debate', 'serialise', 'load', 'initClass', 'applyChanges',
+                          '__proto__', 'constructor', 'prototype']);
     for (const [k, v] of Object.entries(snapshot)) {
       if (skip.has(k)) continue;
+      if (!Object.prototype.hasOwnProperty.call(this, k)) continue;
       this[k] = v;
     }
     /* Reset transient */

@@ -15,10 +15,23 @@ const Save = {
     }
   },
 
+  _validate(d) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return false;
+    if (typeof d.dharmaScore !== 'number') return false;
+    if (typeof d.scene !== 'string')       return false;
+    if (typeof d.act   !== 'number')       return false;
+    /* Block prototype pollution keys */
+    const dangerous = ['__proto__', 'constructor', 'prototype'];
+    if (Object.keys(d).some(k => dangerous.includes(k))) return false;
+    return true;
+  },
+
   read(slot) {
     try {
       const raw = localStorage.getItem(this._key(slot));
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return this._validate(parsed) ? parsed : null;
     } catch (e) { return null; }
   },
 
