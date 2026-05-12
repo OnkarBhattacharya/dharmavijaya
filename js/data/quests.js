@@ -15,7 +15,12 @@ const SIDE_QUESTS = [
     description: 'The cavalry commander who resisted the Asura still carries guilt about his daughter\'s death. A Buddhist monk claims to have knowledge that might bring him peace.',
     steps: [
       { id:'step1', text:'Find the monk Nagarjuna in Pataliputra\'s market district', scene:'sidequest_nagarjuna' },
-      { id:'step2', text:'Bring his teaching to Devapala',                            scene:'sidequest_devapala_closure' },
+      {
+        id:      'step2',
+        text:    'Bring his teaching to Devapala',
+        scene:   'sidequest_devapala_closure',
+        completionFlags: ['devapala_healed'],
+      },
     ],
     reward: { dharma:12, lore:'devapala_peace' },
   },
@@ -24,7 +29,12 @@ const SIDE_QUESTS = [
     title:       "Vijaya's First Edict",
     description: 'Prince Vijaya is writing Kalinga\'s first internal governance charter. He needs counsel on which of Ashoka\'s principles to adapt and which to make his own.',
     steps: [
-      { id:'step1', text:'Advise Vijaya on the charter', scene:'sidequest_vijaya_charter' },
+      {
+        id: 'step1',
+        text:'Advise Vijaya on the charter',
+        scene:'sidequest_vijaya_charter',
+        completionFlags: ['kalinga_charter'],
+      },
     ],
     reward: {
       dharma: 15,
@@ -37,7 +47,12 @@ const SIDE_QUESTS = [
     title:       "The Naga's Question",
     description: 'The Nagas said they would call their debt at an unexpected moment — a truth you have been keeping from yourself.',
     steps: [
-      { id:'step1', text:'Return to the hidden shrine', scene:'sidequest_naga_debt' },
+      {
+        id:'step1',
+        text:'Return to the hidden shrine',
+        scene:'sidequest_naga_debt',
+        completionFlags: ['naga_debt_paid'],
+      },
     ],
     reward: { dharma:20, item:'naga_gem' },
     requireFlag: 'naga_debt',

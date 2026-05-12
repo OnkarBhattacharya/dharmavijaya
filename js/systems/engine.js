@@ -93,12 +93,40 @@ const Engine = {
     const wrap = document.getElementById('choices-area');
     wrap.innerHTML = '';
     (scene.choices || []).forEach(ch => {
-      /* Filter class-exclusive, item-gated, and spoke-gated choices */
-      if (ch.class       && ch.class       !== State.cls)             return;
-      if (ch.requireItem && !State.inventory.includes(ch.requireItem)) return;
+      /* Filter class-exclusive, item-gated, spoke-gated, and meta-gated choices */
+      if (ch.class       && ch.class       !== State.cls)                          return;
+      if (ch.requireItem && !State.inventory.includes(ch.requireItem))          return;
       if (ch.requireSpoke) {
         const { name, min } = ch.requireSpoke;
         if ((State.spokes[name] || 0) < min) return;
+      }
+      if (ch.requireReputation) {
+        const req = ch.requireReputation;
+        if (req && typeof req === 'object') {
+          for (const [k, min] of Object.entries(req)) {
+            if (typeof k !== 'string') continue;
+            const v = (State.reputation?.[k] ?? 0);
+            if (v < Number(min || 0)) return;
+          }
+        }
+      }
+      if (ch.requireMotif) {
+        const req = ch.requireMotif;
+        if (typeof req === 'string') {
+          const key = req;
+          if ((State.motifs?.[key] || 0) <= 0) return;
+        } else if (req && typeof req === 'object') {
+          for (const [k, min] of Object.entries(req)) {
+            const v = (State.motifs?.[k] || 0);
+            if (v < Number(min || 0)) return;
+          }
+        }
+      }
+      if (ch.requireOathsHonored) {
+        const min = Number(ch.requireOathsHonored || 0);
+        const honored = (Array.isArray(State.oaths) ? State.oaths : [])
+          .filter(o => o && o.resolved && !o.broken).length;
+        if (honored < min) return;
       }
 
       const btn = document.createElement('button');
@@ -128,12 +156,83 @@ const Engine = {
 
   /** Handle a choice click */
   _choose(ch) {
+    /* ── Optional skill check (deeper choice mechanic) ──
+       If ch.check exists, resolve success/failure and route to:
+         - ch.onSuccessNext (or ch.next on success)
+         - ch.onFailNext
+       Also optionally apply:
+         - ch.successChanges / ch.failChanges via applyChanges()
+    */
+    let resolvedNext = ch.next;
+    let changesToApply = null;
+
+    if (ch.check && typeof ch.check === 'object') {
+      const stat = ch.check.stat || 'intel';
+      const dc    = Number(ch.check.dc || 10);
+      const failType = ch.failType || 'fail';
+
+      /* Basic stat resolver (extend later) */
+      let value = 0;
+      if (stat === 'intel') value = State.intel.length * 2;
+      else if (stat === 'dharma') value = State.dharmaScore / 8;
+      else if (stat === 'ashokaRel') value = State.ashokaRel / 10;
+      else if (stat === 'gold') value = State.gold / 50;
+
+      /* Momentum can bias checks */
+      const momentum = (State.momentum && typeof State.momentum.value === 'number') ? State.momentum.value : 50;
+      const bias = (momentum - 50) / 10; // -5..+5
+
+      const roll = Math.random() * 20 + value + bias;
+
+      const success = roll >= dc;
+
+      if (success) {
+        resolvedNext = ch.onSuccessNext || ch.onSuccess || ch.next;
+        changesToApply = ch.successChanges || null;
+      } else {
+        resolvedNext = ch.onFailNext || ch.onFail || ch.next;
+        changesToApply = ch.failChanges || null;
+        if (failType === 'partial') {
+          /* Optional: allow partial success reward blocks */
+          if (ch.partialChanges) changesToApply = ch.partialChanges;
+        }
+      }
+    }
+
+    /* ── Apply legacy dharma/item/flags/etc ── */
     if (ch.dharma)     { State.dharmaScore = Math.min(100, State.dharmaScore + ch.dharma);    HUD.adjustSpokes(ch.dharma,    true); }
     if (ch.dharmaLoss) { State.dharmaScore = Math.max(0,   State.dharmaScore - ch.dharmaLoss); HUD.adjustSpokes(ch.dharmaLoss, false); }
     if (ch.item && !State.inventory.includes(ch.item)) {
       State.inventory.push(ch.item);
       State.applyItemEffect(ch.item);
       UI.notify(`Acquired: ${ITEMS_DATA[ch.item]?.name || ch.item}`, 'gold');
+    }
+
+    /* Meta changes at choice-level (backward compatible) */
+    let didApplyMeta = false;
+
+    if (changesToApply && typeof changesToApply === 'object') {
+      State.applyChanges(changesToApply);
+      didApplyMeta = true;
+    } else if (ch.changes && typeof ch.changes === 'object') {
+      State.applyChanges(ch.changes);
+      didApplyMeta = true;
+    }
+
+    /* Support direct fields without requiring a `changes` wrapper */
+    if (!didApplyMeta && (ch.reputationDelta || ch.reputationSet || ch.motif || ch.motifDelta || ch.motifSet || ch.oathAdd || ch.oathResolve || ch.oathBreak || typeof ch.momentumDelta === 'number' || typeof ch.momentumSet === 'number')) {
+      State.applyChanges({
+        reputationDelta: ch.reputationDelta,
+        reputationSet: ch.reputationSet,
+        motif: ch.motif,
+        motifDelta: ch.motifDelta,
+        motifSet: ch.motifSet,
+        oathAdd: ch.oathAdd,
+        oathResolve: ch.oathResolve,
+        oathBreak: ch.oathBreak,
+        momentumDelta: ch.momentumDelta,
+        momentumSet: ch.momentumSet,
+      });
     }
 
     /* Side-quest hooks */
@@ -145,7 +244,7 @@ const Engine = {
 
     HUD.update();
     Audio.playSfx('choice');
-    Engine.go(ch.next);
+    Engine.go(resolvedNext);
   },
 
   /** Write text character by character into a container */
@@ -189,6 +288,21 @@ const Engine = {
     Quests.checkActivations();
     Achievements.check();
     Relationships.update();
+
+    /* Momentum decay (minimal + safe; won’t break existing content)
+       Scenes with special combat/debate tend to reduce “political momentum”. */
+    const id = State.scene;
+    const scene = SCENES[id];
+    if (!scene) return;
+
+    let decay = 0;
+    if (scene.special === 'combat' || scene.special === 'debate') decay -= 1;
+    if (scene.act) decay -= 2; /* act progression = friction */
+
+    if (decay !== 0 && State.momentum && typeof State.momentum.value === 'number') {
+      State.momentum.value = Math.max(0, Math.min(100, State.momentum.value + decay));
+      HUD.update();
+    }
   },
 };
 

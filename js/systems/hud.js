@@ -24,6 +24,9 @@ const HUD = {
     this._style('bar-mp',     'width', `${(State.mp    / State.maxMp)    * 100}%`);
     this._set('wheel-score', State.dharmaScore);
     this.updateDharmaWheel();
+
+    /* Optional: meta panel (only if sidebar elements exist) */
+    this.updateMetaPanel();
   },
 
   /** Nudge 2-3 random spokes by delta */
@@ -183,6 +186,65 @@ const HUD = {
           : State.intel.slice(-5).reverse().map(entry =>
               `<div class="intel-item"><div class="intel-body">${this._esc(entry)}</div></div>`
             ).join('')}
+      </div>`;
+  },
+
+  /** Optional meta meters: reputation, motifs, oaths summary */
+  updateMetaPanel() {
+    /* Guard if sidebar container doesn’t exist yet */
+    const list = document.getElementById('stats-list');
+    if (!list) return;
+
+    let metaSec = document.getElementById('meta-section');
+    if (!metaSec) {
+      metaSec = document.createElement('div');
+      metaSec.id = 'meta-section';
+      metaSec.className = 'meta-section';
+      list.parentNode.appendChild(metaSec);
+    }
+
+    const rep = State.reputation || { court: 50, brahmin: 50, kalinga: 50 };
+    const motifs = State.motifs || {};
+    const motifEntries = Object.entries(motifs)
+      .filter(([, v]) => Number(v) > 0)
+      .sort((a, b) => (b[1] || 0) - (a[1] || 0))
+      .slice(0, 4);
+
+    const oaths = Array.isArray(State.oaths) ? State.oaths : [];
+    const honored = oaths.filter(o => o && o.resolved && !o.broken).length;
+    const broken  = oaths.filter(o => o && o.broken).length;
+
+    const motifLine = motifEntries.length === 0
+      ? `<div style="font-size:11px;color:var(--stone);font-style:italic">No motifs yet.</div>`
+      : motifEntries.map(([k, v]) =>
+          `<div style="display:flex;justify-content:space-between;gap:8px">
+             <span style="font-size:11px;color:var(--gold-dim)">${this._esc(k)}</span>
+             <span style="font-size:11px;color:var(--gold);font-family:var(--font-display)">${v}</span>
+           </div>`
+        ).join('');
+
+    metaSec.innerHTML = `
+      <div class="pane-section-title" style="margin-top:12px">Meta — Reputation</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${['court', 'brahmin', 'kalinga'].map((k) => `
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+            <span style="font-size:10px;color:var(--ash)">${k}</span>
+            <span style="font-size:10px;color:var(--gold);font-family:var(--font-display)">${Math.round(rep[k] || 0)}%</span>
+          </div>
+          <div style="height:4px;background:rgba(42,26,16,.6);border-radius:2px;overflow:hidden">
+            <div style="height:100%;width:${Math.round(rep[k] || 0)}%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));border-radius:2px;transition:width .5s"></div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="pane-section-title" style="margin-top:12px">Motifs & Oaths</div>
+      <div style="font-size:11px;color:var(--stone);margin-bottom:6px">
+        Oaths honored: <span style="color:var(--dharma-light)">${honored}</span> · Broken: <span style="color:var(--blood)">${broken}</span>
+      </div>
+      ${motifLine}
+
+      <div style="margin-top:10px;font-size:11px;color:var(--stone)">
+        Momentum: <span style="color:var(--gold);font-family:var(--font-display)">${Math.round((State.momentum && State.momentum.value) || 0)}</span>/100
       </div>`;
   },
 

@@ -181,10 +181,18 @@ const UI = {
       const q    = SIDE_QUESTS.find(x => x.id === aq.questId);
       if (!q) return '';
       const step = q.steps[aq.currentStep];
+
+      /* Step completion hint (for flag-driven quest steps) */
+      let hint = '';
+      if (step?.completionFlags?.length) {
+        const done = step.completionFlags.some(f => !!State.flags[f]);
+        hint = done ? ' ✓' : '';
+      }
+
       return `<div class="quest-card">
         <div class="quest-card-title">${q.title}</div>
         <div class="quest-card-desc">${q.description}</div>
-        <div class="quest-step">▶ ${step?.text || 'Complete'}</div>
+        <div class="quest-step">▶ ${step?.text || 'Complete'}${hint}</div>
         <button class="quest-go-btn" onclick="UI.closePanel('quests');Engine.go('${step?.scene || 'intro'}')">GO TO QUEST</button>
       </div>`;
     }).join('') || '<div class="lore-empty">No active quests.</div>';
@@ -209,25 +217,33 @@ const UI = {
      Codex
   ───────────────────────────────────────────── */
   openCodex() {
-    const entries = [
-      { icon:'👹', title:'The Asura',          body:'Ancient beings who believe adharma — self-interest, domination — is the true nature of reality. They cannot corrupt what is freely given. They prey on what is half-surrendered. Their weakness: they need us to believe our choices do not matter.' },
-      { icon:'🌑', title:'Mara',               body:'Something vast, old, and exhausted that has watched empire after empire collapse. Its power is persuasion, not force. In Buddhist tradition it is the principle of temptation itself. It cannot be killed. It can be answered.' },
-      { icon:'🐍', title:'The Nagas',          body:'Serpent beings of great intelligence, maintaining underground kingdoms predating human civilisation. Neutral, amoral information brokers. They deal in truths, not loyalties. The Naga Gem reveals supernatural concealment.' },
-      { icon:'🔥', title:'Kali',               body:'Destroyer and protector. She walks near places of great moral reckoning — not as enemy, but as the force that ends what must end. Her presence near Kalinga was a sign: the old order was about to be resolved.' },
-      { icon:'🌳', title:'Yakshas',            body:'Nature spirits of forest and crossroads. Mercurial and emotional. They can be bargained with through offerings, or offended through carelessness. They appear at liminal moments — dawn, dusk, threshold crossings.' },
-      { icon:'🧿', title:'The Asura Vessel',   body:'A human who accepted an Asura\'s bargain under duress. Unlike the Asura itself, vessels can recover if the entity is removed or weakened. Viduratha was a vessel, not a true agent — his recovery was possible.' },
-    ];
+    const hasLore = (k) => Array.isArray(State.lore) && State.lore.includes(k);
+    const hasIntel = (k) => Array.isArray(State.intel) && State.intel.includes(k);
+    const hasFlag  = (k) => !!State.flags?.[k];
+
+    const unlocked = (entry) => {
+      const req = entry?.requires || {};
+      const loreOk  = !req.lore?.length || req.lore.every(hasLore);
+      const intelOk = !req.intel?.length || req.intel.every(hasIntel);
+      const flagsOk = !req.flags?.length || req.flags.every(hasFlag);
+      return loreOk && intelOk && flagsOk;
+    };
+
     this._openPanel('codex', () => `
       <div class="panel-box">
         <div class="panel-title">📖 CODEX</div>
-        ${entries.map(e => `
-          <div class="codex-entry">
-            <div class="codex-entry-header">
-              <span class="codex-entry-icon">${e.icon}</span>
-              <span class="codex-entry-title">${e.title}</span>
-            </div>
-            <div class="codex-entry-body">${e.body}</div>
-          </div>`).join('')}
+        ${CODEX_DATA.map(e => {
+          const ok = unlocked(e);
+          return `
+            <div class="codex-entry ${ok ? '' : 'codex-locked'}">
+              <div class="codex-entry-header">
+                <span class="codex-entry-icon">${e.icon}</span>
+                <span class="codex-entry-title">${e.title}</span>
+                <span class="codex-entry-status">${ok ? '✓' : '…'}</span>
+              </div>
+              <div class="codex-entry-body">${ok ? e.body : 'Locked. Gather lore, intelligence, or resolve related events.'}</div>
+            </div>`;
+        }).join('')}
         <button class="btn-main" style="width:100%;margin-top:4px" onclick="UI.closePanel('codex')">CLOSE CODEX</button>
       </div>`);
   },
@@ -306,6 +322,17 @@ window.UI = UI;
    Quests helper (used by engine + UI)
 ───────────────────────────────────────────── */
 const Quests = {
+  _stepIsComplete(q, stepIdx) {
+    const step = q?.steps?.[stepIdx];
+    if (!step) return false;
+
+    /* Backward compatible: if no completionFlags, treat as always complete */
+    if (!Array.isArray(step.completionFlags) || step.completionFlags.length === 0) {
+      return true;
+    }
+    return step.completionFlags.some(flag => !!State.flags?.[flag]);
+  },
+
   checkActivations() {
     SIDE_QUESTS.forEach(q => {
       if (State.activeQuests[q.id] || State.completedQuests.includes(q.id)) return;
@@ -320,6 +347,13 @@ const Quests = {
     if (!aq) return;
     const q = SIDE_QUESTS.find(x => x.id === questId);
     if (!q) return;
+
+    /* If the current step is gated, require its completion flags */
+    if (!this._stepIsComplete(q, aq.currentStep)) {
+      UI.notify(`📋 Complete the quest step first: ${q.steps[aq.currentStep]?.text || ''}`, 'stone', 2800);
+      return;
+    }
+
     const nextStep = aq.currentStep + 1;
     if (nextStep >= q.steps.length) return; // complete() handles final step
     aq.currentStep = nextStep;
@@ -330,6 +364,20 @@ const Quests = {
     if (!State.activeQuests[questId]) return;
     const q = SIDE_QUESTS.find(x => x.id === questId);
     if (!q) return;
+
+    const aq = State.activeQuests[questId];
+    const isLastStep = (aq.currentStep >= q.steps.length - 1);
+    if (!isLastStep) {
+      UI.notify(`📋 Quest not ready to complete yet: ${q.steps[aq.currentStep]?.text || ''}`, 'stone', 2800);
+      return;
+    }
+
+    /* For completion, require last step completion flags if defined */
+    if (!this._stepIsComplete(q, aq.currentStep)) {
+      UI.notify(`📋 Complete the final step first: ${q.steps[aq.currentStep]?.text || ''}`, 'stone', 2800);
+      return;
+    }
+
     delete State.activeQuests[questId];
     State.completedQuests.push(questId);
     if (q.reward.dharma)  { State.dharmaScore = Math.min(100, State.dharmaScore + q.reward.dharma); HUD.adjustSpokes(q.reward.dharma, true); }
