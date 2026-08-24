@@ -129,10 +129,10 @@
       <!-- Sidebar -->
       <div class="sidebar">
         <div class="sidebar-tabs">
-          <button class="stab active" onclick="UI.switchTab('wheel',this)">☸</button>
-          <button class="stab" onclick="UI.switchTab('stats',this)">⚔</button>
-          <button class="stab" onclick="UI.switchTab('inv',this)">🎒</button>
-          <button class="stab" onclick="UI.switchTab('lore',this)">📜</button>
+          <button class="stab active" onclick="UI.switchTab('wheel',this)" aria-label="Dharma wheel tab">☸</button>
+          <button class="stab" onclick="UI.switchTab('stats',this)" aria-label="Character stats tab">⚔</button>
+          <button class="stab" onclick="UI.switchTab('inv',this)" aria-label="Inventory tab">🎒</button>
+          <button class="stab" onclick="UI.switchTab('lore',this)" aria-label="Lore tab">📜</button>
         </div>
         <div id="pane-wheel"  class="sidebar-pane active"></div>
         <div id="pane-stats"  class="sidebar-pane"></div>
@@ -149,7 +149,7 @@
       <button class="bb-btn" onclick="UI.openSpyNetwork()">🕵 SANSTHA</button>
       <button class="bb-btn" onclick="UI.openQuestLog()">📋 QUESTS</button>
       <button class="bb-btn" onclick="UI.openCodex()">📖 CODEX</button>
-      <button class="bb-btn" onclick="UI.openAchievements()">🏆</button>
+      <button class="bb-btn" onclick="UI.openAchievements()" aria-label="Achievements">🏆</button>
       <button class="bb-btn" onclick="UI.openTimeline()">📜 LOG</button>
       <button class="bb-btn" id="btn-sound" onclick="Audio.toggle()">🔇 SOUND</button>
       <div class="bb-spacer"></div>
@@ -175,40 +175,40 @@
 ══════════════════════════════ -->
 
 <!-- Data layer -->
-<script src="js/data/classes.js"></script>
-<script src="js/data/items.js"></script>
-<script src="js/data/enemies.js"></script>
-<script src="js/data/lore.js"></script>
-<script src="js/data/art.js"></script>
-<script src="js/data/debates.js"></script>
-<script src="js/data/endings.js"></script>
-<script src="js/data/achievements.js"></script>
-<script src="js/data/map.js"></script>
-<script src="js/data/shop.js"></script>
-<script src="js/data/quests.js"></script>
-<script src="js/data/spy.js"></script>
+<script defer src="js/data/classes.js"></script>
+<script defer src="js/data/items.js"></script>
+<script defer src="js/data/enemies.js"></script>
+<script defer src="js/data/lore.js"></script>
+<script defer src="js/data/art.js"></script>
+<script defer src="js/data/debates.js"></script>
+<script defer src="js/data/endings.js"></script>
+<script defer src="js/data/achievements.js"></script>
+<script defer src="js/data/map.js"></script>
+<script defer src="js/data/shop.js"></script>
+<script defer src="js/data/quests.js"></script>
+<script defer src="js/data/spy.js"></script>
 
 <!-- Scene data (split by act for easy editing) -->
-<script src="js/scenes/act1.js"></script>
-<script src="js/scenes/act2.js"></script>
-<script src="js/scenes/act3.js"></script>
-<script src="js/scenes/sidequests.js"></script>
+<script defer src="js/scenes/act1.js"></script>
+<script defer src="js/scenes/act2.js"></script>
+<script defer src="js/scenes/act3.js"></script>
+<script defer src="js/scenes/sidequests.js"></script>
 
 <!-- Systems -->
-<script src="js/systems/state.js"></script>
-<script src="js/systems/engine.js"></script>
-<script src="js/systems/combat.js"></script>
-<script src="js/systems/debate.js"></script>
-<script src="js/systems/audio.js"></script>
-<script src="js/systems/save.js"></script>
+<script defer src="js/systems/state.js"></script>
+<script defer src="js/systems/engine.js"></script>
+<script defer src="js/systems/combat.js"></script>
+<script defer src="js/systems/debate.js"></script>
+<script defer src="js/systems/audio.js"></script>
+<script defer src="js/systems/save.js"></script>
 
 <!-- UI layer -->
-<script src="js/systems/hud.js"></script>
-<script src="js/systems/ui.js"></script>
-<script src="js/systems/overlays.js"></script>
+<script defer src="js/systems/hud.js"></script>
+<script defer src="js/systems/ui.js"></script>
+<script defer src="js/systems/overlays.js"></script>
 
 <!-- Entry point -->
-<script src="js/main.js"></script>
+<script defer src="js/main.js"></script>
 
 </body>
 </html>

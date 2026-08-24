@@ -141,7 +141,7 @@ const HUD = {
     if (!list) return;
 
     const rows = [
-      ['Class',         State.name || '—'],
+      ['Class',         this._esc(State.name || '—')],
       ['Act',           `${State.act} of 3`],
       ['HP',            `${State.hp} / ${State.maxHp}`],
       ['MP',            `${State.mp} / ${State.maxMp}`],

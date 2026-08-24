@@ -2,14 +2,14 @@
 
 A narrative RPG set in 3rd century BCE India. Serve Emperor Ashoka across three acts of conquest, remorse, and enlightenment. Every choice shifts the Dharma Wheel. History bends around your decisions.
 
-**[Play it live →] http://onkarbhattacharya.github.io/dharmavijaya **
+**[Play it live →](https://onkarbhattacharya.github.io/dharmavijaya/)**
 
 ---
 
 ## Features
 
 - **4 playable classes** — Kshatriya (warrior), Bhikshu (monk), Amatya (spy), Sthapati (builder)
-- **3 full acts** with 80+ branching scenes
+- **3 full acts** with 70+ branching scenes
 - **Mara philosophical debate system** — timed argument rounds with real consequences, Dharma Scroll hint system
 - **Dharma Wheel** — 8-spoke alignment tracker (Ahimsa, Satya, Dana, Shila, Karuna, Prajna, Virya, Upekkha) with SVG visualization
 - **Turn-based combat** — 5 action types + class-specific abilities (Battle Rage, Compassion Field, Poison Strike, Fortify)
@@ -54,6 +54,7 @@ dharmavijaya/
 │   │   ├── debates.js      ← Mara debate rounds
 │   │   ├── endings.js      ← Ending texts + computeEnding()
 │   │   ├── achievements.js ← Achievement definitions
+│   │   ├── codex.js        ← Codex entry definitions
 │   │   ├── map.js          ← Map location list
 │   │   ├── shop.js         ← Merchant item list
 │   │   ├── quests.js       ← Side quest definitions
@@ -74,8 +75,9 @@ dharmavijaya/
 │       ├── save.js         ← localStorage save/load
 │       ├── hud.js          ← HUD + sidebar rendering
 │       ├── ui.js           ← Panels, notifications, quests, achievements
-│       ├── overlays.js     ← Fixed overlay management
-│       └── main.js         ← Entry point, Game object, keyboard shortcuts
+│       └── overlays.js     ← Fixed overlay management
+│
+├── js/main.js              ← Entry point, Game object, keyboard shortcuts
 ```
 
 ---
